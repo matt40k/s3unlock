@@ -35,6 +35,7 @@ namespace S3Unlock
         {
             InitializeComponent();
             sql = new SqlCmd();
+            versionLabel.Content = "Version: " + Version;
         }
 
         private void Connect_Click(object sender, RoutedEventArgs e)
@@ -103,6 +104,14 @@ namespace S3Unlock
                 this.Reset.Visibility = Visibility.Hidden;
                 this.ResetAll.Visibility = Visibility.Hidden;
             }
+        }
+
+        /// <summary>
+        /// Gets the application version
+        /// </summary>
+        protected internal static string Version
+        {
+            get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(); }
         }
     }
 }
