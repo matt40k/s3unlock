@@ -30,6 +30,12 @@ namespace S3Unlock
             return OpenConnection;
         }
 
+        /// <summary>
+        /// Creates a MS-SQL connection to the S3 database
+        /// </summary>
+        /// <param name="server">MS-SQL Server for example: localhost\sims2008</param>
+        /// <param name="database">The S3 MS-SQL database name</param>
+        /// <returns></returns>
         public bool CreateConnection(string server, string database)
         {
             try
@@ -69,18 +75,23 @@ namespace S3Unlock
             }
         }
 
-        /*
-         * AgentOffline = 1
-         * AgentOnline = 2,
-         * AgentInstallQueued = 4
-         * AgentInstallActive = 8
-         * AgentInstallFailed = 16
-         * AgentNotInstalled = 32
-         * AgentUninstallQueued = 64
-         * AgentUninstallActive = 128
-         * AgentUninstallFailed = 256
-         * PendingRedirect = 512
-         */
+        /// <summary>
+        /// Queryies the S3 database for status of agents with the status code of Install Queued (4) and Install Active (8)
+        /// 
+        ///  SOLUS3 Agent Status code
+        ///  ========================
+        ///    AgentOffline = 1
+        ///    AgentOnline = 2
+        ///    AgentInstallQueued = 4
+        ///    AgentInstallActive = 8
+        ///    AgentInstallFailed = 16
+        ///    AgentNotInstalled = 32
+        ///    AgentUninstallQueued = 64
+        ///    AgentUninstallActive = 128
+        ///    AgentUninstallFailed = 256
+        ///    PendingRedirect = 512
+        /// 
+        /// </summary>
         public DataTable GetS3LockedAgents
         {
             get
@@ -106,7 +117,7 @@ namespace S3Unlock
                         FROM
                           [solus3].[agent]
                         WHERE
-                          [agent_status] = 8", connection);
+                          [agent_status] in ( 4, 8 )", connection);
                     dataReader = sqlCommand.ExecuteReader();
                     dt.Load(dataReader);
                 }
@@ -118,13 +129,18 @@ namespace S3Unlock
             }
         }
 
+        /// <summary>
+        /// Updates all the 'agent' table on the SOLUS3 database where the agent status is 
+        /// install queued (4) or active (8) to install failed (16)
+        /// </summary>
+        /// <returns>true if successfully</returns>
         public bool UpdateAll
         {
             get
             {
                 try
                 {
-                    SqlCommand sqlCommand = new SqlCommand("update [solus3].[agent] set agent_status = 16 where agent_status = 8", connection);
+                    SqlCommand sqlCommand = new SqlCommand("update [solus3].[agent] set agent_status = 16 where agent_status in ( 4, 8 )", connection);
                     sqlCommand.ExecuteNonQuery();
                 }
                 catch (Exception)
@@ -135,11 +151,19 @@ namespace S3Unlock
             }
         }
 
+
+
+        /// <summary>
+        /// Updates a specific agent in the 'agent' table on the SOLUS3 database where the agent status is 
+        /// install queued (4) or active (8) to install failed (16)
+        /// </summary>
+        /// <param name="guid">S3 Agent GUID</param>
+        /// <returns>true if successfully</returns>
         public bool UpdateSingle(string guid)
         {
             try
             {
-                SqlCommand sqlCommand = new SqlCommand("update [solus3].[agent] set agent_status = 16 where agent_status = 8 and agent_guid = '" + guid + "'", connection);
+                SqlCommand sqlCommand = new SqlCommand("update [solus3].[agent] set agent_status = 16 where agent_status in ( 4, 8 ) and agent_guid = '" + guid + "'", connection);
                 sqlCommand.ExecuteNonQuery();
             }
             catch (Exception)

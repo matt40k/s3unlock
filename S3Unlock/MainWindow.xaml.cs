@@ -27,6 +27,10 @@ namespace S3Unlock
     public partial class MainWindow : Window
     {
         private SqlCmd sql;
+        
+        /// <summary>
+        /// MainWindow
+        /// </summary>
         public MainWindow()
         {
             InitializeComponent();
