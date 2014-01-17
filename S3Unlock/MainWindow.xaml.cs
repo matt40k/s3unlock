@@ -4,6 +4,7 @@
  */
 
 using System;
+using System.ComponentModel;
 using System.Data;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,6 +18,13 @@ namespace Matt40k.S3Unlock
     {
         private SqlCmd sql;
         private bool IsSqlAuth = true;
+        private BackgroundWorker bw = new BackgroundWorker();
+        private bool IsConn = false;
+
+        private string _user;
+        private string _pass;
+        private string _server;
+        private string _database;
         
         /// <summary>
         /// MainWindow
@@ -25,80 +33,127 @@ namespace Matt40k.S3Unlock
         {
             InitializeComponent();
             sql = new SqlCmd();
-            versionLabel.Content = "Version: " + Version;
-        }
-
-        private void Connect_Click(object sender, RoutedEventArgs e)
-        {
-            if (IsSqlAuth)
-            {
-                // Use SQL Authentication
-                if (sql.CreateConnection(this.User.Text, this.Pass.Password, this.Server.Text, this.Database.Text))
-                {
-                    this.Connect.IsEnabled = false;
-                    GetLockAgents();
-                    GetLockDeployments();
-                }
-                else
-                {
-                    MessageBox.Show("Try again, can't get connected :(", "Error connecting...");
-                }
-            }
-            else
-            {
-                // Use Windows Authentication
-                if (sql.CreateConnection(this.Server.Text, this.Database.Text))
-                {
-                    this.Connect.IsEnabled = false;
-                    GetLockAgents();
-                    GetLockDeployments();
-                }
-                else
-                {
-                    MessageBox.Show("Try again, can't get connected :(", "Error connecting...");
-                }
-            }
-        }
-
-        private void Button_Click_1(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Selected tab: " + (tc.SelectedItem as TabItem).Header);
-            try
-            {
-                if (sql.UpdateAllS3AgentStatus)
-                    GetLockAgents();
-                else
-                    MessageBox.Show("Failed");
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("Failed");
-            }
-        }
-
-        private void Button_Click_2(object sender, RoutedEventArgs e)
-        {
-            /*
-            int cnt = dataGrid.SelectedItems.Count;
-            for (int i = 0; i < cnt; i++)
-            {
-                DataRowView row = (DataRowView)dataGrid.SelectedItems[i];
-                try
-                {
-                    if (sql.UpdateSingleS3AgentStatus(row["agent_guid"].ToString()))
-                        GetLockAgents();
-                    else
-                        MessageBox.Show("Failed");
-                }
-                catch (Exception)
-                {
-                    MessageBox.Show("Failed");
-                }
-            }*/
+            VersionLabel.Content = "Version: " + Version;
         }
 
         /// <summary>
-        ///  
+        /// Button click action for connecting to SQL, or at leasting trying ;)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Connect_Click(object sender, RoutedEventArgs e)
+        {
+            _user = this.User.Text;
+            _pass = this.Pass.Password;
+            _server = this.Server.Text;
+            _database = this.Database.Text;
+
+            bw = new BackgroundWorker();
+            bw.WorkerReportsProgress = true;
+            bw.WorkerSupportsCancellation = true;
+            bw.DoWork += bw_DoWork;
+            bw.RunWorkerCompleted += bw_RunWorkerCompleted;
+
+            if (bw.IsBusy != true)
+                bw.RunWorkerAsync();
+        }
+
+        /// <summary>
+        /// Resets all the "locked" Agents or Deployments. The current tab is used to define if 
+        /// it is a Agent or a Deployment.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ResetAllButton_Click(object sender, RoutedEventArgs e)
+        {
+            switch ((string)(tc.SelectedItem as TabItem).Header)
+            {
+                case "Agents":
+                    try
+                    {
+                        if (sql.UpdateAllS3AgentStatus)
+                            GetLockAgents();
+                        else
+                            MessageBox.Show("Failed");
+                    }
+                    catch (Exception)
+                    {
+                        MessageBox.Show("Failed");
+                    }
+                    break;
+                case "Deployments":
+                    try
+                    {
+                        if (sql.UpdateAllS3DeploymentStatus)
+                            GetLockAgents();
+                        else
+                            MessageBox.Show("Failed");
+                    }
+                    catch (Exception)
+                    {
+                        MessageBox.Show("Failed");
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Resets only selected locks
+        /// Again, users the selected tab to define if it's "Agent" or "Deployment" lock being reset.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ResetButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Use the selected tab to defined if it's an 'Agent' reset or a 'Deployment'
+            switch ((string) (tc.SelectedItem as TabItem).Header)
+            {
+                case "Agents":
+                    int agentcnt = dataGridAgent.SelectedItems.Count;
+                    for (int i = 0; i < agentcnt; i++)
+                    {
+                        DataRowView row = (DataRowView) dataGridAgent.SelectedItems[i];
+                        try
+                        {
+                            if (sql.UpdateSingleS3AgentStatus(row["agent_guid"].ToString()))
+                                GetLockAgents();
+                            else
+                                MessageBox.Show("Failed");
+                        }
+                        catch (Exception)
+                        {
+                            MessageBox.Show("Failed");
+                        }
+                    }
+                    break;
+                case "Deployments":
+                    int deploymentcnt = dataGridDeployment.SelectedItems.Count;
+                    for (int i = 0; i < deploymentcnt; i++)
+                    {
+                        DataRowView row = (DataRowView) dataGridDeployment.SelectedItems[i];
+                        try
+                        {
+                            if (sql.UpdateSingleS3DeploymentStatus(row["distributed_deployment_plan_guid"].ToString()))
+                                GetLockDeployments();
+                            else
+                                MessageBox.Show("Failed");
+                        }
+                        catch (Exception)
+                        {
+                            MessageBox.Show("Failed");
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Gets the "locked" agents from the SOLUS3 database and unlocks the UI
+        /// if they are any "locks".
         /// </summary>
         private void GetLockAgents()
         {
@@ -121,7 +176,8 @@ namespace Matt40k.S3Unlock
         }
 
         /// <summary>
-        /// 
+        /// Gets the "locked" deployments from the SOLUS3 database and unlocks the UI
+        /// if they are any "locks".
         /// </summary>
         private void GetLockDeployments()
         {
@@ -158,7 +214,7 @@ namespace Matt40k.S3Unlock
         /// <param name="e"></param>
         private void AuthRadioButton_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            var value = (int)AuthRadioButton.Value;
+            var value = (int)AuthSlider.Value;
             switch (value)
             {
                 case 1:
@@ -172,6 +228,14 @@ namespace Matt40k.S3Unlock
             }
         }
 
+        /// <summary>
+        /// Set the SQL authentication that the UI will use
+        /// 
+        ///   true  = SQL
+        ///   false = Windows
+        /// 
+        /// </summary>
+        /// <param name="value">true equals SQL auth, false equals Windows</param>
         private void SetAuthMode(bool value)
         {
             IsSqlAuth = value;
@@ -192,6 +256,65 @@ namespace Matt40k.S3Unlock
                 // Reset the content to blank
                 this.User.Text = null;
                 this.Pass.Password = null;
+            }
+        }
+
+        /// <summary>
+        /// Trys to connect to MS-SQL server as a backgroundworker task, this is so waiting for it to fail 
+        /// doesn't lock the UI thread making the application appear not to respond.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void bw_DoWork(object sender, DoWorkEventArgs e)
+        {
+            var worker = sender as BackgroundWorker;
+
+            if (IsSqlAuth)
+            {
+                // Use SQL Authentication
+                IsConn = sql.CreateConnection(_user, _pass, _server, _database);
+            }
+            else
+            {
+                // Use Windows Authentication
+                IsConn = sql.CreateConnection(_server, _database);
+            }
+        }
+
+        /// <summary>
+        /// Once the backgroundwoker task is complete it checks if it is connected then locks the connection
+        /// UI elements and queries the database.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void bw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Cancelled)
+            {
+                MessageBox.Show("Try again, user cancelled connection :(", "Cancelled onnecting...");
+            }
+            else if (!(e.Error == null))
+            {
+                MessageBox.Show("Try again, can't get connected :(", "Error connecting...");
+            }
+            else
+            {
+                if (IsConn)
+                {
+                    this.Connect.IsEnabled = false;
+                    this.Database.IsEnabled = false;
+                    this.Server.IsEnabled = false;
+                    this.User.IsEnabled = false;
+                    this.Pass.IsEnabled = false;
+                    this.AuthSlider.IsEnabled = false;
+                    this.tc.IsEnabled = true;
+                    GetLockAgents();
+                    GetLockDeployments();
+                }
+                else
+                {
+                    MessageBox.Show("Try again, can't get connected :(", "Error connecting...");
+                }
             }
         }
     }

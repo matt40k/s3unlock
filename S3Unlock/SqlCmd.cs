@@ -9,7 +9,7 @@ using System.Data.SqlClient;
 
 namespace Matt40k.S3Unlock
 {
-    internal class SqlCmd
+    public class SqlCmd
     {
         private SqlConnection connection;
 
