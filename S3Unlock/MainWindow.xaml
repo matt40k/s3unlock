@@ -4,37 +4,45 @@
         Title="S3Unlock" Height="700" Width="700" Icon="icon.ico" MinHeight="700" MinWidth="700">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="10"/>
-            <RowDefinition Height="25"/>
-            <RowDefinition Height="5"/>
-            <RowDefinition Height="25"/>
+            <RowDefinition Height="10" />
+            <RowDefinition Height="25" />
             <RowDefinition Height="5" />
-            <RowDefinition Height="25"/>
-            <RowDefinition Height="15"/>
-            <RowDefinition MinHeight="480" Height="*"/>
-            <RowDefinition Height="15"/>
-            <RowDefinition Height="25"/>
-            <RowDefinition Height="30"/>
+            <RowDefinition Height="25" />
+            <RowDefinition Height="5" />
+            <RowDefinition Height="25" />
+            <RowDefinition Height="15" />
+            <RowDefinition MinHeight="480" Height="*" />
+            <RowDefinition Height="15" />
+            <RowDefinition Height="25" />
+            <RowDefinition Height="30" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10" />
             <ColumnDefinition Width="300" />
             <ColumnDefinition Width="10" />
             <ColumnDefinition Width="180" />
-            <ColumnDefinition MinWidth="180" Width="*"  />
+            <ColumnDefinition MinWidth="180" Width="*" />
             <ColumnDefinition Width="10" />
         </Grid.ColumnDefinitions>
-        <TextBox Name="Server" Grid.Column="1" HorizontalAlignment="Left" Height="23" Grid.Row="1" Text="localhost\sims2008" VerticalAlignment="Top" Width="200" TabIndex="1"/>
-        <TextBox Name="Database" Grid.Column="3" HorizontalAlignment="Left" Height="23" Grid.Row="1" Text="solus3_deployment_server" VerticalAlignment="Top" Width="150" TabIndex="50" IsReadOnly="True"/>
+        <TextBox Name="Server" Grid.Column="1" HorizontalAlignment="Left" Height="23" Grid.Row="1"
+                 Text="localhost\sims2008" VerticalAlignment="Top" Width="200" TabIndex="1" />
+        <TextBox Name="Database" Grid.Column="3" HorizontalAlignment="Left" Height="23" Grid.Row="1"
+                 Text="solus3_deployment_server" VerticalAlignment="Top" Width="150" TabIndex="50" IsReadOnly="True" />
 
-        <TextBox Name="User" Grid.Column="1" HorizontalAlignment="Left" Height="23" Grid.Row="3" Text="sa" VerticalAlignment="Top" Width="120" TabIndex="2"/>
-        <PasswordBox  Name="Pass" Grid.Column="3" HorizontalAlignment="Left" Height="23" Grid.Row="3" VerticalAlignment="Top" Width="120" TabIndex="3"/>
-        <Button Name="Connect" Content="Connect" Grid.Column="3" HorizontalAlignment="Left" Grid.Row="5" VerticalAlignment="Top" Width="75" Click="Connect_Click" TabIndex="4"/>
+        <TextBox Name="User" Grid.Column="1" HorizontalAlignment="Left" Height="23" Grid.Row="3" Text="sa"
+                 VerticalAlignment="Top" Width="120" TabIndex="2" />
+        <PasswordBox Name="Pass" Grid.Column="3" HorizontalAlignment="Left" Height="23" Grid.Row="3"
+                     VerticalAlignment="Top" Width="120" TabIndex="3" />
+        <Button Name="Connect" Content="Connect" Grid.Column="3" HorizontalAlignment="Left" Grid.Row="5"
+                VerticalAlignment="Top" Width="75" Click="Connect_Click" TabIndex="4" />
 
-        <Slider Name="AuthSlider" Grid.Column="1" HorizontalAlignment="Left" Grid.Row="5" VerticalAlignment="Center" Width="75" Minimum="0" Maximum="1" ValueChanged="AuthRadioButton_ValueChanged" />
-        <Label Grid.Column="1" HorizontalAlignment="Center" Grid.Row="5" VerticalAlignment="Top" Content="SQL" Name="AuthLabel" />
+        <Slider Name="AuthSlider" Grid.Column="1" HorizontalAlignment="Left" Grid.Row="5" VerticalAlignment="Center"
+                Width="75" Minimum="0" Maximum="1" ValueChanged="AuthRadioButton_ValueChanged" />
+        <Label Grid.Column="1" HorizontalAlignment="Center" Grid.Row="5" VerticalAlignment="Top" Content="SQL"
+               Name="AuthLabel" />
 
-        <Grid Grid.Column="1" Grid.ColumnSpan="4" HorizontalAlignment="Stretch" Grid.Row="7" VerticalAlignment="Stretch">
+        <Grid Grid.Column="1" Grid.ColumnSpan="4" HorizontalAlignment="Stretch" Grid.Row="7"
+              VerticalAlignment="Stretch">
             <TabControl Margin="5 5 5 0" Name="tc" IsEnabled="False">
                 <TabItem Header="Agents">
                     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
@@ -44,14 +52,22 @@
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="10"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="10" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <DataGrid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Visibility="Visible" Name="dataGridAgent" ItemsSource="{Binding Path=.}" AutoGenerateColumns="True" SelectionMode="Extended" SelectionUnit="FullRow" SelectedIndex="1" IsReadOnly="True" />
-                        <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Name="SmileyAgent" Content=":)" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="240" Visibility="Hidden"/>
+                        <DataGrid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Visibility="Visible"
+                                  Name="dataGridAgent" ItemsSource="{Binding Path=.}" AutoGenerateColumns="True"
+                                  SelectionMode="Extended" SelectionUnit="FullRow" SelectedIndex="1" IsReadOnly="True" />
+                        <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Name="SmileyAgent" Content=":)"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="240"
+                               Visibility="Hidden" />
 
-                        <Button Grid.Row="1" Grid.Column="0" Name="ResetAgent" Content="Reset" HorizontalAlignment="Right" VerticalAlignment="Center" Width="75" Click="ResetButton_Click" Visibility="Hidden"/>
-                        <Button Grid.Row="1" Grid.Column="2" Name="ResetAllAgent" Content="Reset All" HorizontalAlignment="Left" VerticalAlignment="Center" Width="75" Click="ResetAllButton_Click" Visibility="Hidden"/>
+                        <Button Grid.Row="1" Grid.Column="0" Name="ResetAgent" Content="Reset"
+                                HorizontalAlignment="Right" VerticalAlignment="Center" Width="75"
+                                Click="ResetButton_Click" Visibility="Hidden" />
+                        <Button Grid.Row="1" Grid.Column="2" Name="ResetAllAgent" Content="Reset All"
+                                HorizontalAlignment="Left" VerticalAlignment="Center" Width="75"
+                                Click="ResetAllButton_Click" Visibility="Hidden" />
                     </Grid>
                 </TabItem>
                 <TabItem Header="Deployments">
@@ -62,18 +78,27 @@
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="10"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="10" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <DataGrid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Visibility="Visible" Name="dataGridDeployment" ItemsSource="{Binding Path=.}" AutoGenerateColumns="True" SelectionMode="Extended" SelectionUnit="FullRow" SelectedIndex="1" IsReadOnly="True"/>
-                        <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Name="SmileyDeployment" Content=":)" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="240" Visibility="Hidden"/>
-                        <Button Grid.Row="1" Grid.Column="0" Name="ResetDeployment" Content="Reset" HorizontalAlignment="Right" VerticalAlignment="Center" Width="75" Click="ResetButton_Click" Visibility="Hidden"/>
-                        <Button Grid.Row="1" Grid.Column="2" Name="ResetAllDeployment" Content="Reset All" HorizontalAlignment="Left" VerticalAlignment="Center" Width="75" Click="ResetAllButton_Click" Visibility="Hidden"/>
+                        <DataGrid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Visibility="Visible"
+                                  Name="dataGridDeployment" ItemsSource="{Binding Path=.}" AutoGenerateColumns="True"
+                                  SelectionMode="Extended" SelectionUnit="FullRow" SelectedIndex="1" IsReadOnly="True" />
+                        <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Name="SmileyDeployment" Content=":)"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="240"
+                               Visibility="Hidden" />
+                        <Button Grid.Row="1" Grid.Column="0" Name="ResetDeployment" Content="Reset"
+                                HorizontalAlignment="Right" VerticalAlignment="Center" Width="75"
+                                Click="ResetButton_Click" Visibility="Hidden" />
+                        <Button Grid.Row="1" Grid.Column="2" Name="ResetAllDeployment" Content="Reset All"
+                                HorizontalAlignment="Left" VerticalAlignment="Center" Width="75"
+                                Click="ResetAllButton_Click" Visibility="Hidden" />
                     </Grid>
                 </TabItem>
             </TabControl>
         </Grid>
 
-        <Label Name="VersionLabel" Content="Version: " Grid.Column="1" HorizontalAlignment="Left" Grid.Row="10" VerticalAlignment="Top"/>
+        <Label Name="VersionLabel" Content="Version: " Grid.Column="1" HorizontalAlignment="Left" Grid.Row="10"
+               VerticalAlignment="Top" />
     </Grid>
 </Window>

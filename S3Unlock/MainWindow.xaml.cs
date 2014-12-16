@@ -6,28 +6,28 @@
 using System;
 using System.ComponentModel;
 using System.Data;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace Matt40k.S3Unlock
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    ///     Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
-        private SqlCmd sql;
-        private bool IsSqlAuth = true;
-        private BackgroundWorker bw = new BackgroundWorker();
-        private bool IsConn = false;
-
-        private string _user;
+        private string _database;
         private string _pass;
         private string _server;
-        private string _database;
-        
+        private string _user;
+        private BackgroundWorker bw = new BackgroundWorker();
+        private bool IsConn;
+        private bool IsSqlAuth = true;
+        private readonly SqlCmd sql;
+
         /// <summary>
-        /// MainWindow
+        ///     MainWindow
         /// </summary>
         public MainWindow()
         {
@@ -37,16 +37,24 @@ namespace Matt40k.S3Unlock
         }
 
         /// <summary>
-        /// Button click action for connecting to SQL, or at leasting trying ;)
+        ///     Gets the application version
+        /// </summary>
+        protected internal static string Version
+        {
+            get { return Assembly.GetExecutingAssembly().GetName().Version.ToString(); }
+        }
+
+        /// <summary>
+        ///     Button click action for connecting to SQL, or at leasting trying ;)
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void Connect_Click(object sender, RoutedEventArgs e)
         {
-            _user = this.User.Text;
-            _pass = this.Pass.Password;
-            _server = this.Server.Text;
-            _database = this.Database.Text;
+            _user = User.Text;
+            _pass = Pass.Password;
+            _server = Server.Text;
+            _database = Database.Text;
 
             bw = new BackgroundWorker();
             bw.WorkerReportsProgress = true;
@@ -59,14 +67,14 @@ namespace Matt40k.S3Unlock
         }
 
         /// <summary>
-        /// Resets all the "locked" Agents or Deployments. The current tab is used to define if 
-        /// it is a Agent or a Deployment.
+        ///     Resets all the "locked" Agents or Deployments. The current tab is used to define if
+        ///     it is a Agent or a Deployment.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void ResetAllButton_Click(object sender, RoutedEventArgs e)
         {
-            switch ((string)(tc.SelectedItem as TabItem).Header)
+            switch ((string) (tc.SelectedItem as TabItem).Header)
             {
                 case "Agents":
                     try
@@ -100,8 +108,8 @@ namespace Matt40k.S3Unlock
         }
 
         /// <summary>
-        /// Resets only selected locks
-        /// Again, users the selected tab to define if it's "Agent" or "Deployment" lock being reset.
+        ///     Resets only selected locks
+        ///     Again, users the selected tab to define if it's "Agent" or "Deployment" lock being reset.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -111,10 +119,10 @@ namespace Matt40k.S3Unlock
             switch ((string) (tc.SelectedItem as TabItem).Header)
             {
                 case "Agents":
-                    int agentcnt = dataGridAgent.SelectedItems.Count;
-                    for (int i = 0; i < agentcnt; i++)
+                    var agentcnt = dataGridAgent.SelectedItems.Count;
+                    for (var i = 0; i < agentcnt; i++)
                     {
-                        DataRowView row = (DataRowView) dataGridAgent.SelectedItems[i];
+                        var row = (DataRowView) dataGridAgent.SelectedItems[i];
                         try
                         {
                             if (sql.UpdateSingleS3AgentStatus(row["agent_guid"].ToString()))
@@ -129,10 +137,10 @@ namespace Matt40k.S3Unlock
                     }
                     break;
                 case "Deployments":
-                    int deploymentcnt = dataGridDeployment.SelectedItems.Count;
-                    for (int i = 0; i < deploymentcnt; i++)
+                    var deploymentcnt = dataGridDeployment.SelectedItems.Count;
+                    for (var i = 0; i < deploymentcnt; i++)
                     {
-                        DataRowView row = (DataRowView) dataGridDeployment.SelectedItems[i];
+                        var row = (DataRowView) dataGridDeployment.SelectedItems[i];
                         try
                         {
                             if (sql.UpdateSingleS3DeploymentStatus(row["distributed_deployment_plan_guid"].ToString()))
@@ -152,88 +160,78 @@ namespace Matt40k.S3Unlock
         }
 
         /// <summary>
-        /// Gets the "locked" agents from the SOLUS3 database and unlocks the UI
-        /// if they are any "locks".
+        ///     Gets the "locked" agents from the SOLUS3 database and unlocks the UI
+        ///     if they are any "locks".
         /// </summary>
         private void GetLockAgents()
         {
-            DataTable lockAgents = sql.GetS3LockedAgents;
+            var lockAgents = sql.GetS3LockedAgents;
             if (lockAgents.Rows.Count > 0)
             {
-                this.dataGridAgent.DataContext = lockAgents;
-                this.SmileyAgent.Visibility = Visibility.Hidden;
-                this.dataGridAgent.Visibility = Visibility.Visible;
-                this.ResetAgent.Visibility = Visibility.Visible;
-                this.ResetAllAgent.Visibility = Visibility.Visible;
+                dataGridAgent.DataContext = lockAgents;
+                SmileyAgent.Visibility = Visibility.Hidden;
+                dataGridAgent.Visibility = Visibility.Visible;
+                ResetAgent.Visibility = Visibility.Visible;
+                ResetAllAgent.Visibility = Visibility.Visible;
             }
             else
             {
-                this.SmileyAgent.Visibility = Visibility.Visible;
-                this.dataGridAgent.Visibility = Visibility.Hidden;
-                this.ResetAgent.Visibility = Visibility.Hidden;
-                this.ResetAllAgent.Visibility = Visibility.Hidden;
+                SmileyAgent.Visibility = Visibility.Visible;
+                dataGridAgent.Visibility = Visibility.Hidden;
+                ResetAgent.Visibility = Visibility.Hidden;
+                ResetAllAgent.Visibility = Visibility.Hidden;
             }
         }
 
         /// <summary>
-        /// Gets the "locked" deployments from the SOLUS3 database and unlocks the UI
-        /// if they are any "locks".
+        ///     Gets the "locked" deployments from the SOLUS3 database and unlocks the UI
+        ///     if they are any "locks".
         /// </summary>
         private void GetLockDeployments()
         {
-            DataTable lockDeployments = sql.GetS3LockedDeployments;
+            var lockDeployments = sql.GetS3LockedDeployments;
             if (lockDeployments.Rows.Count > 0)
             {
-                this.dataGridDeployment.DataContext = lockDeployments;
-                this.SmileyDeployment.Visibility = Visibility.Hidden;
-                this.dataGridDeployment.Visibility = Visibility.Visible;
-                this.ResetDeployment.Visibility = Visibility.Visible;
-                this.ResetAllDeployment.Visibility = Visibility.Visible;
+                dataGridDeployment.DataContext = lockDeployments;
+                SmileyDeployment.Visibility = Visibility.Hidden;
+                dataGridDeployment.Visibility = Visibility.Visible;
+                ResetDeployment.Visibility = Visibility.Visible;
+                ResetAllDeployment.Visibility = Visibility.Visible;
             }
             else
             {
-                this.SmileyDeployment.Visibility = Visibility.Visible;
-                this.dataGridDeployment.Visibility = Visibility.Hidden;
-                this.ResetDeployment.Visibility = Visibility.Hidden;
-                this.ResetAllDeployment.Visibility = Visibility.Hidden;
+                SmileyDeployment.Visibility = Visibility.Visible;
+                dataGridDeployment.Visibility = Visibility.Hidden;
+                ResetDeployment.Visibility = Visibility.Hidden;
+                ResetAllDeployment.Visibility = Visibility.Hidden;
             }
         }
 
         /// <summary>
-        /// Gets the application version
-        /// </summary>
-        protected internal static string Version
-        {
-            get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(); }
-        }
-
-        /// <summary>
-        /// Set the SQL authentication
+        ///     Set the SQL authentication
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void AuthRadioButton_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            var value = (int)AuthSlider.Value;
+            var value = (int) AuthSlider.Value;
             switch (value)
             {
                 case 1:
-                    this.AuthLabel.Content = "Windows";
+                    AuthLabel.Content = "Windows";
                     SetAuthMode(false);
                     break;
                 default:
-                    this.AuthLabel.Content = "SQL";
+                    AuthLabel.Content = "SQL";
                     SetAuthMode(true);
                     break;
             }
         }
 
         /// <summary>
-        /// Set the SQL authentication that the UI will use
-        /// 
-        ///   true  = SQL
-        ///   false = Windows
-        /// 
+        ///     Set the SQL authentication that the UI will use
+        ///     true  = SQL
+        ///     false = Windows
         /// </summary>
         /// <param name="value">true equals SQL auth, false equals Windows</param>
         private void SetAuthMode(bool value)
@@ -241,27 +239,27 @@ namespace Matt40k.S3Unlock
             IsSqlAuth = value;
             if (value)
             {
-                this.User.IsEnabled = true;
-                this.Pass.IsEnabled = true;
+                User.IsEnabled = true;
+                Pass.IsEnabled = true;
 
                 // Reset the content to 'sa' from blank
-                this.User.Text = "sa";
+                User.Text = "sa";
             }
             else
             {
                 // Disable the Username and Password textboxes as we don't need them...
-                this.User.IsEnabled = false;
-                this.Pass.IsEnabled = false;
+                User.IsEnabled = false;
+                Pass.IsEnabled = false;
 
                 // Reset the content to blank
-                this.User.Text = null;
-                this.Pass.Password = null;
+                User.Text = null;
+                Pass.Password = null;
             }
         }
 
         /// <summary>
-        /// Trys to connect to MS-SQL server as a backgroundworker task, this is so waiting for it to fail 
-        /// doesn't lock the UI thread making the application appear not to respond.
+        ///     Trys to connect to MS-SQL server as a backgroundworker task, this is so waiting for it to fail
+        ///     doesn't lock the UI thread making the application appear not to respond.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -282,8 +280,8 @@ namespace Matt40k.S3Unlock
         }
 
         /// <summary>
-        /// Once the backgroundwoker task is complete it checks if it is connected then locks the connection
-        /// UI elements and queries the database.
+        ///     Once the backgroundwoker task is complete it checks if it is connected then locks the connection
+        ///     UI elements and queries the database.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -301,13 +299,13 @@ namespace Matt40k.S3Unlock
             {
                 if (IsConn)
                 {
-                    this.Connect.IsEnabled = false;
-                    this.Database.IsEnabled = false;
-                    this.Server.IsEnabled = false;
-                    this.User.IsEnabled = false;
-                    this.Pass.IsEnabled = false;
-                    this.AuthSlider.IsEnabled = false;
-                    this.tc.IsEnabled = true;
+                    Connect.IsEnabled = false;
+                    Database.IsEnabled = false;
+                    Server.IsEnabled = false;
+                    User.IsEnabled = false;
+                    Pass.IsEnabled = false;
+                    AuthSlider.IsEnabled = false;
+                    tc.IsEnabled = true;
                     GetLockAgents();
                     GetLockDeployments();
                 }
